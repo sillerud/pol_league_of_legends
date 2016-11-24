@@ -1,5 +1,5 @@
 extern crate crypto;
-extern crate hyper;
+extern crate reqwest;
 
 use std::io::{self, Read, Write};
 use std::path::Path;
@@ -11,8 +11,7 @@ use std::collections::HashMap;
 use crypto::md5::Md5;
 use crypto::digest::Digest;
 
-use hyper::Client;
-use hyper::status::StatusCode;
+use reqwest::Client;
 
 #[derive(Hash, Eq, PartialEq, Clone)]
 struct LoLVersion {
@@ -65,7 +64,7 @@ fn main() {
         });
     let mut map = HashMap::new();
     let mut regions_found: Vec<&'static str> = vec!();
-    let http_client = Client::new();
+    let http_client = Client::new().expect("Couldn't create client");
     let mut hash = Md5::new();
     let cache_folder = Path::new("filecache");
     if !cache_folder.exists() {
@@ -116,9 +115,8 @@ fn main() {
 }
 
 fn download(http_client: &Client, download_url: &String, path: &Path) -> bool {
-    let result = http_client.get(download_url);
-    let mut result = result.send().expect("Failed to download file");
-    if result.status != StatusCode::Ok {
+    let mut result = http_client.get(download_url).send().expect("Failed to download file");
+    if !result.status().is_success() {
         return false;
     }
     let mut out_file = File::create(path).expect("Could not create file.");
