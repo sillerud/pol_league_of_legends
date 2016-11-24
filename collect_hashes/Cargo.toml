@@ -1,0 +1,8 @@
+[package]
+name = "collect_hashes"
+version = "0.1.0"
+authors = ["Kevin Sillerud <kevin.sillerud@gmail.com>"]
+
+[dependencies]
+rust-crypto = "^0.2"
+hyper = "0.9.12"
