@@ -12,6 +12,7 @@ use crypto::md5::Md5;
 use crypto::digest::Digest;
 
 use reqwest::Client;
+use reqwest::StatusCode;
 
 #[derive(Hash, Eq, PartialEq, Clone)]
 struct LoLVersion {
@@ -116,7 +117,7 @@ fn main() {
 
 fn download(http_client: &Client, download_url: &String, path: &Path) -> bool {
     let mut result = http_client.get(download_url).send().expect("Failed to download file");
-    if !result.status().is_success() {
+    if *(result.status()) != StatusCode::Ok {
         return false;
     }
     let mut out_file = File::create(path).expect("Could not create file.");
