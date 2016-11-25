@@ -5,8 +5,6 @@ use std::io::{self, Read, Write};
 use std::path::Path;
 use std::fs;
 use std::fs::File;
-use std::collections::HashMap;
-//use std::slice::SliceConcatExt;
 
 use crypto::md5::Md5;
 use crypto::digest::Digest;
@@ -14,64 +12,67 @@ use crypto::digest::Digest;
 use reqwest::Client;
 use reqwest::StatusCode;
 
-#[derive(Hash, Eq, PartialEq, Clone)]
+#[derive(Hash, Eq, PartialEq)]
 struct LoLVersion {
     region: &'static str,
     version: &'static str,
     description: &'static str
 }
 
+static VERSIONS: [LoLVersion; 8] = [
+    LoLVersion {
+        version: "2016_11_10",
+        region: "EUW",
+        description: "EU West"
+    },
+    LoLVersion {
+        region: "NA",
+        version: "2016_05_13",
+        description: "North America"
+    },
+    LoLVersion {
+        region: "EUNE",
+        version: "2016_11_10",
+        description: "EU Nordic & East"
+    },
+    LoLVersion {
+        region: "OC1",
+        version: "2016_05_13",
+        description: "Oceania"
+    },
+    LoLVersion {
+        region: "RU",
+        version: "2016_05_13",
+        description: "Russia"
+    },
+    LoLVersion {
+        region: "LA1",
+        version: "2016_05_26",
+        description: "Latin America North"
+    },
+    LoLVersion {
+        region: "LA2",
+        version: "2016_05_27",
+        description: "Latin America South"
+    },
+    LoLVersion {
+        region: "BR",
+        version: "2016_05_13",
+        description: "Brazil"
+    }
+];
+
 fn main() {
-    let versions = vec!(
-        LoLVersion {
-            version: "2016_11_10",
-            region: "EUW",
-            description: "EU West"
-        },
-        LoLVersion {
-            region: "NA",
-            version: "2016_05_13",
-            description: "North America"
-        },
-        LoLVersion {
-            region: "EUNE",
-            version: "2016_11_10",
-            description: "EU Nordic & East"
-        },
-        LoLVersion {
-            region: "OC1",
-            version: "2016_05_13",
-            description: "Oceania"
-        },
-        LoLVersion {
-            region: "RU",
-            version: "2016_05_13",
-            description: "Russia"
-        },
-        LoLVersion {
-            region: "LA1",
-            version: "2016_05_26",
-            description: "Latin America North"
-        },
-        LoLVersion {
-            region: "LA2",
-            version: "2016_05_27",
-            description: "Latin America South"
-        },
-        LoLVersion {
-            region: "BR",
-            version: "2016_05_13",
-            description: "Brazil"
-        });
-    let mut map = HashMap::new();
-    let mut regions_found: Vec<&'static str> = vec!();
     let http_client = Client::new().expect("Couldn't create client");
+    let mut regions_found = vec!();
     let mut hash = Md5::new();
     let cache_folder = Path::new("filecache");
     if !cache_folder.exists() {
         fs::create_dir(cache_folder).expect("Failed to create installer cache folder");
     }
-    for version in versions.clone() {
+
+
+    for version in &VERSIONS {
         let download_url = get_url(&version);
         println!("Calculating hash for url: {}", download_url);
         // Check if file exists in cache
@@ -91,23 +92,21 @@ fn main() {
         hash.input(&bytes);
         let hash_result = hash.result_str();
         println!("{}", &hash_result);
-        map.insert(version, hash_result);
+        regions_found.push((version, hash_result));
         hash.reset();
     }
 
-    let hashes_map: Vec<String> = map
-        .iter()
-        .map(|(version, hash)| format!("[\"{}\"]=\"{}\"", version.description, hash))
+    let hashes_map: Vec<String> = regions_found.iter()
+        .map(|&(ref version, ref hash)| format!("[\"{}\"]=\"{}\"", version.description, hash))
         .collect();
-    let url_map: Vec<String> = versions.clone()
-        .iter()
-        .map(|version| format!("[\"{}\"]=\"{}\"", version.description, get_url(&version)))
+    let url_map: Vec<String> = regions_found.iter()
+        .map(|&(ref version, _)| format!("[\"{}\"]=\"{}\"", version.description, get_url(&version)))
         .collect();
-    let region_map: Vec<String> = versions.clone().iter()
-        .map(|version| format!("[\"{}\"]=\"{}\"", version.description, version.region))
+    let region_map: Vec<String> = regions_found.iter()
+        .map(|&(ref version, _)| format!("[\"{}\"]=\"{}\"", version.description, version.region))
         .collect();
-    let description_map: Vec<String> = versions.clone().iter()
-        .map(|version| version.description.to_owned())
+    let description_map: Vec<String> = regions_found.iter()
+        .map(|&(ref version, _)| version.description.to_owned())
         .collect();
     println!("declare -A HASHES=( {} )", hashes_map.join(" "));
     println!("declare -A URLS=( {} )", url_map.join(" "));
