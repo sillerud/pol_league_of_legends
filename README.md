@@ -50,7 +50,8 @@ first time launching the beta does'nt work). The beta client wont be able to run
 --no-sandbox
 
 ## Known issues
-* The patcher might crash, you might restart the client multiple times during the first installation.
+* The patcher might crash multiple times during installation, restarting the client should work and you might need to 
+do it more then once.
 
 ## Troubleshooting
 If you're having issues with the client crashing, launch the patcher in debug mode, look for err: in the console and
