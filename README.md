@@ -13,9 +13,11 @@ extracts it. When this is done it executes the LoL installer, this is also done 
 
 ## Installation
 The installation should be pretty straight forward.
+* Download the script from: https://raw.githubusercontent.com/TheUnnamedDude/pol_league_of_legends/master/league_of_legends.sh
 * Start PlayOnLinux.
 * Open the tools dropdown menu.
 * Select "Run a local script"
+* Select the script league of legends.sh
 * Follow the instructions and select your region.
 
 When you're done with that you will get a shortcut named League of Legends, you should be able to launch it.
