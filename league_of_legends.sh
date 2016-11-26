@@ -15,25 +15,24 @@ REGION_DESC="EU West|North America|EU Nordic & East|Oceania|Russia|Latin America
 
 POL_SetupWindow_Init
 
-POL_SetupWindow_message "Welcome to this wizard for installing League of Legends with the newer installers and unpatched wine $(pwd)"
+POL_SetupWindow_message "Welcome to this wizard for installing League of Legends with the newer installers and unpatched wine"
 
 POL_SetupWindow_menu "Select your region" "Select region" "$REGION_DESC" "|"
 REGION="${REGIONS[$APP_ANSWER]}"
 LOL_DOWNLOAD_HASH="${HASHES[$APP_ANSWER]}"
 LOL_DOWNLOAD_URL="${URLS[$APP_ANSWER]}"
 
-POL_SetupWindow_message "Going to download $LOL_DOWNLOAD_URL"
-
-POL_SetupWindow_menu "Select what version of wine you want.\nThe stable version is tested and more stable.\nStaging can be faster and contains\npatches that makes games run faster" "Select wine version" "Stable|Staging" "|"
-if [ "$APP_ANSWER" = "Stable" ]
-then
-	WINE_VERSION="$WINE_STABLE_VERSION"
-elif [ "$APP_ANSWER" = "Staging" ]
-then
-	WINE_VERSION="$WINE_STAGING_VERSION"
-fi
+# For some reason the initial patching doesn't work with staging, so temporarily disable the choice
+#POL_SetupWindow_menu "Select what version of wine you want.\nThe stable version is tested and more stable.\nStaging can be faster and contains\npatches that makes games run faster" "Select wine version" "Stable|Staging" "|"
+#if [ "$APP_ANSWER" = "Stable" ]
+#then
+#	WINE_VERSION="$WINE_STABLE_VERSION"
+#elif [ "$APP_ANSWER" = "Staging" ]
+#then
+#	WINE_VERSION="$WINE_STAGING_VERSION"
+#fi
 POL_Wine_SelectPrefix "$PREFIX"
-POL_Wine_PrefixCreate "$WINE_VERSION"
+POL_Wine_PrefixCreate "$WINE_STABLE_VERSION"#"$WINE_VERSION"
 
 POL_System_TmpCreate "lol_msi"
 cd "$POL_System_TmpDir"
