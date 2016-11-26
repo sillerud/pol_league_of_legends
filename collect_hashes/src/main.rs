@@ -35,9 +35,9 @@ fn main() {
         fs::create_dir(cache_path).expect("Could not create cache directory");
     }
 
-    let mut found = Vec::new();
+    let mut found = vec![];
     let mut hash = Md5::new();
-    let http_client = Client::new().expect("Could not create http client");
+    let client = Client::new().expect("Could not create http client");
 
     for v in VERSIONS {
         let url = format!("https://riotgamespatcher-a.akamaihd.net/ShellInstaller/{region}/LeagueofLegends_{region}_Installer_{version}.exe",
@@ -46,38 +46,44 @@ fn main() {
         println!("Calculating hash for url: {}", url);
 
         let exec = cache_path.join(format!("LeagueofLegends_{}_Installer_{}.exe", v.region, v.version));
+        let mut buf = vec![];
 
-        // If the installer doesn't exist try to download it.
-        if !exec.exists() {
-            let mut res = http_client.get(&url).send().expect("Could not download file");
-
-            if *res.status() != StatusCode::Ok {
-                println!("Warning: Couldn't download file {}", url);
+        if exec.exists() {
+            if File::open(&exec).and_then(|mut f| f.read_to_end(&mut buf)).is_err() {
+                println!("Warning: Could not read from installer: {:?}", exec);
                 continue;
             }
+        } else {
+            match client.get(&url).send() {
+                // We are only interested in a successful response.
+                Ok(ref mut r) if *r.status() == StatusCode::Ok => {
+                    if r.read_to_end(&mut buf).is_err() {
+                        println!("Warning: Could not read from downloaded installer: {:?}", exec);
+                        continue;
+                    }
 
-            let mut buf = vec![];
-            res.read_to_end(&mut buf).expect("Could not read from response");
-
-            let mut file = File::create(&exec).expect(&format!("Could not create installer at: {:?}", exec));
-            file.write_all(&buf).expect("Could not write to file {}");
+                    if File::create(&exec).and_then(|mut f| f.write_all(&buf)).is_err() {
+                        println!("Warning: Could not save downloaded installer: {:?}", exec);
+                        continue;
+                    }
+                }
+                _ => {
+                    println!("Warning: Could not download installer: {}", url);
+                    continue;
+                }
+            }
         }
 
-        let mut file = File::open(&exec).expect(&format!("Could not find installer: {:?}", exec));
-
-        let mut buf = vec![];
-        file.read_to_end(&mut buf).expect("Could not read installer data");
         hash.input(&buf);
-
         let hash_str = hash.result_str();
-        println!("{}", hash_str);
-
         hash.reset();
+
+        println!("{}", hash_str);
 
         found.push((hash_str, url, v));
     }
 
-    // Create string outputs for hashes, urls, regions, and descriptions using 4 string allocations.
+    // Create string outputs for hashes, urls, regions, and descriptions
     let (mut hashes, mut urls, mut regions, mut desc) = found.iter()
         .fold((String::new(), String::new(), String::new(), String::new()), |s, &(ref hash, ref url, v)| {
             ((s.0 + "[\"" + v.desc + "\"]=\"" + hash + "\" "),
