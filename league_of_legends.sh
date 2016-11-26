@@ -49,6 +49,6 @@ POL_Call POL_Install_d3dx9
 Set_OS "winxp"
 POL_Call POL_Function_OverrideDLL builtin,native wininet
 
-POL_Shortcut "lol.launcher.admin.exe" "League of Legends"
+POL_Shortcut "lol.launcher.admin.exe" "League of Legends (new)"
 
 POL_SetupWindow_Close
