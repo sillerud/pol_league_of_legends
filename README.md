@@ -58,3 +58,6 @@ do it more then once.
 ## Troubleshooting
 If you're having issues with the client crashing, launch the patcher in debug mode, look for err: in the console and
 google the errors you get. Its most likely a problem with missing libraries and you fix it by installing them.
+
+## Credits
+This approach uses the same way of installing the patcher as the AUR package does: https://aur.archlinux.org/packages/leagueoflegends/
