@@ -42,7 +42,7 @@ $HOME/.PlayOnLinux/wineprefix/LeagueOfLegends_NEW.
 
 The next thing you need to do is to install a recent version of winetricks, then you run the command:
 ```bash
-WINEARCH=win32 WINEPREFIX=$HOME/.PlayOnLinux/wineprefix/LeagueOfLegends_NEW/ winetricks vcrun15
+WINEARCH=win32 WINEPREFIX=$HOME/.PlayOnLinux/wineprefix/LeagueOfLegends_NEW/ winetricks vcrun2015
 ```
 
 Then you can launch the league client and start updating to the beta, make sure to close the client after its done
