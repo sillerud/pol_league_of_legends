@@ -32,7 +32,7 @@ LOL_DOWNLOAD_URL="${URLS[$APP_ANSWER]}"
 #	WINE_VERSION="$WINE_STAGING_VERSION"
 #fi
 POL_Wine_SelectPrefix "$PREFIX"
-POL_Wine_PrefixCreate "$WINE_STABLE_VERSION"#"$WINE_VERSION"
+POL_Wine_PrefixCreate "$WINE_STABLE_VERSION" #"$WINE_VERSION"
 
 POL_System_TmpCreate "lol_msi"
 cd "$POL_System_TmpDir"
