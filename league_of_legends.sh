@@ -5,7 +5,7 @@ source "$PLAYONLINUX/lib/sources"
 PREFIX="LeagueOfLegends_NEW"
 TITLE="League of Legends installer"
 WINE_STAGING_VERSION="1.9.23-staging"
-WINE_STABLE_VERSION="1.9.23"
+WINE_STABLE_VERSION="1.9.24"
 LEAGUE_OF_LEGENDS_VERSION="2016_11_10"
 
 declare -A HASHES=( ["Russia"]="7803b38f78badc03585fb0ef588d130b" ["EU Nordic & East"]="ca65a9d529310603b2777d703e490dbc" ["North America"]="aad5fb3163e32a77a48f65fda820275c" ["Latin America South"]="8750db743cc19c50eee4454d21f1ce60" ["Latin America North"]="e2126127aa73b497a2d12b2ff17316a5" ["Brazil"]="782c92b0f8f4920385a9d6782d0c7292" ["EU West"]="5ef1f0c65fb99296a03023f80a74d104" ["Oceania"]="761af34a3054db7661edfe3bf55c48ee" )
@@ -48,6 +48,8 @@ POL_Call POL_Install_d3dx9
 
 Set_OS "winxp"
 POL_Call POL_Function_OverrideDLL builtin,native wininet
+
+POL_Wine_reboot
 
 POL_Shortcut "lol.launcher.admin.exe" "League of Legends (new)"
 
