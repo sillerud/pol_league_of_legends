@@ -35,57 +35,49 @@ fn main() {
         fs::create_dir(cache_path).expect("Could not create cache directory");
     }
 
-    let mut found = vec![];
-    let mut hash = Md5::new();
     let client = Client::new().expect("Could not create http client");
+    let mut hash = Md5::new();
+    
+    let (mut hashes, mut urls, mut regions, mut desc) = VERSIONS.iter()
+        .filter_map(|v| {
+            let url = format!("https://riotgamespatcher-a.akamaihd.net/ShellInstaller/{region}/LeagueofLegends_{region}_Installer_{version}.exe",
+                region = v.region, version = v.version);
 
-    for v in VERSIONS {
-        let url = format!("https://riotgamespatcher-a.akamaihd.net/ShellInstaller/{region}/LeagueofLegends_{region}_Installer_{version}.exe",
-            region = v.region, version = v.version);
+            println!("Calculating hash for: {}", v.desc);
 
-        println!("Calculating hash for url: {}", url);
+            let exec = cache_path.join(format!("LeagueofLegends_{}_Installer_{}.exe", v.region, v.version));
+            let mut buf = vec![];
 
-        let exec = cache_path.join(format!("LeagueofLegends_{}_Installer_{}.exe", v.region, v.version));
-        let mut buf = vec![];
-
-        if exec.exists() {
-            if File::open(&exec).and_then(|mut f| f.read_to_end(&mut buf)).is_err() {
-                println!("Warning: Could not read from installer: {:?}", exec);
-                continue;
-            }
-        } else {
-            match client.get(&url).send() {
-                // We are only interested in a successful response.
-                Ok(ref mut r) if *r.status() == StatusCode::Ok => {
-                    if r.read_to_end(&mut buf).is_err() {
-                        println!("Warning: Could not read from downloaded installer: {:?}", exec);
-                        continue;
-                    }
-
-                    if File::create(&exec).and_then(|mut f| f.write_all(&buf)).is_err() {
-                        println!("Warning: Could not save downloaded installer: {:?}", exec);
-                        continue;
-                    }
+            if exec.exists() {
+                // If the installer already exists then we just read from it.
+                if File::open(&exec).and_then(|mut f| f.read_to_end(&mut buf)).is_err() {
+                    println!("Warning: Could not read from installer: {:?}", exec);
+                    return None;
                 }
-                _ => {
-                    println!("Warning: Could not download installer: {}", url);
-                    continue;
+            } else {
+                // If not we attempt to download and cache the installer.
+                if match client.get(&url).send() {
+                    Ok(ref mut r) if *r.status() == StatusCode::Ok => {
+                        r.read_to_end(&mut buf)
+                            .and_then(|_| File::create(&exec))
+                            .and_then(|mut f| f.write_all(&buf))
+                            .ok()
+                    }
+                    _ => Some(()),
+                }.is_none() {
+                    println!("Warning: Could not download or save installer: {:?}", exec);
+                    return None;
                 }
             }
-        }
 
-        hash.input(&buf);
-        let hash_str = hash.result_str();
-        hash.reset();
+            hash.input(&buf);
+            let hash_str = hash.result_str();
+            println!("{}", &hash_str);
+            hash.reset();
 
-        println!("{}", hash_str);
-
-        found.push((hash_str, url, v));
-    }
-
-    // Create string outputs for hashes, urls, regions, and descriptions
-    let (mut hashes, mut urls, mut regions, mut desc) = found.iter()
-        .fold((String::new(), String::new(), String::new(), String::new()), |s, &(ref hash, ref url, v)| {
+            Some((hash_str, url, v))
+        })
+        .fold((String::new(), String::new(), String::new(), String::new()), |s, (ref hash, ref url, v)| {
             ((s.0 + "[\"" + v.desc + "\"]=\"" + hash + "\" "),
              (s.1 + "[\"" + v.desc + "\"]=\"" + url + "\" "),
              (s.2 + "[\"" + v.desc + "\"]=\"" + v.region + "\" "),
