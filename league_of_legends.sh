@@ -43,13 +43,13 @@ POL_Download "$LOL_DOWNLOAD_URL" "$LOL_DOWNLOAD_HASH" "$POL_System_TmpDir"
 POL_Wine "$INSTALLER" "/extract:$(winepath -w $POL_System_TmpDir/lol_msi)" "/execnoui"
 POL_Wine "msiexec" "/i" "$POL_System_TmpDir/LoL.$REGION.msi" "APPDIR=C:\\Riot Games" "/q"
 
-POL_Call POL_Install_vcrun2005
+#POL_Call POL_Install_vcrun2005
 POL_Call POL_Install_d3dx9
 
-Set_OS "winxp"
+#Set_OS "winxp"
 POL_Call POL_Function_OverrideDLL builtin,native wininet
 
-POL_Wine_reboot
+#POL_Wine_reboot
 
 POL_Shortcut "lol.launcher.admin.exe" "League of Legends (new)"
 
